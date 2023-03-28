@@ -1,82 +1,78 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Point
-{
-    class Point
+// Point Class
+    // Represents a point in the n-th dimension
+    public class Point
     {
-        private float[] coord; // coordinate storage
-        private int Dim;
+        private float[] coord { get; set; } // Coordinate storage 
 
-        public Point(int dim) 
+        // Constructor
+        // Creates a zero point in the specified dimension
+        public Point(int dim)
         {
-            coord = new float[dim];
-            Dim = dim;
+            coord = new float[dim]; // Create array to store 
         }
 
-        public int getDim() 
-        { 
-            return Dim; 
+        // getDim
+        // Returns the dimension the point is in
+        public int getDim()
+        {
+            return coord.Length;
         }
 
-        public float get(int i) 
-        { 
-            return coord[i]; 
+        // Get
+        // Returns the i-th dimension value in a coordinate
+        public float Get(int i)
+        {
+            return coord[i];
         }
 
-        public void set(int i, float x) 
-        { 
-            coord[i] = x; 
+        // Set
+        // Sets the i-th dimension value in a cordinate
+        public void Set(int i, float value)
+        {
+            coord[i] = value;
         }
 
-        public bool equals(Point other) 
-        { 
-            for(int i = 0; i < Dim; i++)
-            {
-                if (coord[i] != other.coord[i])
-                    return false;
-            }
-            return true;
-        }
-
+        // distanceTo
+        // Returns the Euclidean distance between two points in the nth-dimensions
         public float distanceTo(Point other)
         {
-            double x = 0;
-            for (int i = 0;i < Dim; i++)
+            double distance = 0;
+
+            for (int i = 0; i < getDim(); i++) // For each dimension
             {
-                x += (Math.Pow(Convert.ToDouble(coord[i]), 2.0));
+                distance += Math.Pow(other.coord[i] - this.coord[i], 2);
             }
-            x = Math.Sqrt(x);
-            return Convert.ToSingle(x);
+            return (float)Math.Sqrt(distance);
         }
 
-        public String toString() 
+        // Equals Override
+        // Returns if a point in k-th dimensional space 
+        public override bool Equals(Object? obj)
         {
-            string str = "(";
-            for(int i = 0; i < Dim;i++)
-                str += (coord[i].ToString() + ", ");
-
-            str = str.Substring(0, str.Length - 2);
-            str += ")";
-
-            return str;
+            if (obj != null) // Null check
+            {
+                Point p = (Point)obj; // Downcast 
+                for (int i = 0; i < getDim(); i++) // For each dimension
+                {
+                    if (this.coord[i] != p.coord[i]) return false; // Compare values
+                }
+                return true;
+            }
+            return false; // Null
         }
-    }
 
-    class Program
-    {
-        static void Main(string[] args)
+        // ToString Override
+        // Converts the point to a string
+        public override string ToString()
         {
-            Random rnd = new Random();
-            Point point = new Point(50);
+            string pointString = "( "; // Empty string
 
-            for (int i = 0; i < point.getDim(); i++)
-                point.set(i, (rnd.NextSingle() + Convert.ToSingle(rnd.Next(100))));
-
-            Console.WriteLine(point.toString());
+            for (int i = 0; i < getDim(); i++) // For each dimension, concatenate the dimension value to the return string
+            {
+                pointString += coord[i]+ " ";
+            }
+            pointString += ")";
+            return pointString;
         }
+
     }
-}
