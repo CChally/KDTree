@@ -76,3 +76,9 @@
         }
 
     }
+
+        //tree.Print();
+        Console.ReadKey();
+    }
+}
+
