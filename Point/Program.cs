@@ -99,9 +99,9 @@
             return whodatis;
         }
 
-        public string toString()
+        public string ToString()
         {
-            return "(" + cutDim.ToString() +" "+ point.ToString() + ")";
+            return "(" +" "+ point.ToString() + ")" + cutDim.ToString();
         }
     }
 
@@ -122,12 +122,13 @@
             maxVal = max;
         }
 
-        public bool Insert(Point p, KDNode x, int cutDim)
+        public bool Insert(Point p,ref KDNode x, int cutDim)
         {
             
             if (x == null)
             { // fell out of tree
                 x = new KDNode(p, cutDim); // create new leaf
+                Console.WriteLine(x.point.ToString());
             }
             else if (x.point.Equals(p))
             {
@@ -135,12 +136,12 @@
             }
             else if (x.inLeftSubtree(p))
             { // insert into left subtree
-                Insert(p, x.left, (x.cutDim + 1) % p.getDim());
+                return Insert(p, ref x.left, (x.cutDim + 1) % p.getDim());
                 Console.WriteLine(x.cutDim +1 % p.getDim());
             }
             else
             { // insert into right subtree
-                Insert(p, x.right, (x.cutDim + 1) % p.getDim());
+                return Insert(p, ref x.right, (x.cutDim + 1) % p.getDim());
                 Console.WriteLine(x.cutDim + 1 % p.getDim());
             }
 
@@ -165,16 +166,17 @@
 
         public void Print()
         {
-            Print(root, 4);
+            int depth = 0;
+            Print(root, 1, depth);
         }
 
-        public void Print(KDNode p, int padding)
+        public void Print(KDNode p, int padding, int depth)
         {
             if (p != null)
             {
                 if (p.right != null)
                 {
-                    Print(p.right, padding + 4);
+                    Print(p.right, padding + 4, depth+1);
                 }
                 if (padding > 0)
                 {
@@ -185,11 +187,11 @@
                     Console.Write("/\n");
                     Console.Write(" ".PadLeft(padding));
                 }
-                Console.Write(p.point.ToString() + "\n ");
+                Console.Write(depth + p.ToString() + "\n ");
                 if (p.left != null)
                 {
                     Console.Write(" ".PadLeft(padding) + "\\\n");
-                    Print(p.left, padding + 4);
+                    Print(p.left, padding + 4, depth + 1);
                 }
             }
         }
@@ -203,17 +205,17 @@ class Program
 
         for (int j = 0; j < 10; j++)
         {
-            Point point = new Point(3);
+            Point point = new Point(2);
 
             for (int i = 0; i < point.getDim(); i++)
                 point.Set(i,  (rnd.NextSingle() + Convert.ToSingle(rnd.Next(100))));
             Console.WriteLine(point.ToString());    
-            Console.WriteLine(tree.Insert(point, tree.root, j % point.getDim()));
+            Console.WriteLine(tree.Insert(point, ref tree.root, j % point.getDim()));
         }
 
 
         ///tree.Print();
-        //tree.Print();
+        tree.Print();
         Console.ReadKey();
     }
 }
