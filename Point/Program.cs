@@ -171,10 +171,7 @@
             
         }
 
-        public bool Delete(Point p)
-        {
-            return true;
-        }
+        
 
         //First Contains() method called by user
         //takes a Point p and returns true if point is in the tree otherwise false
@@ -198,10 +195,85 @@
                 return false;       //if nothing found return false
         }
 
-        bool FindMin()
+
+        public KDNode delete(Point p)
         {
-            return true;
+            if (this.Contains(p))
+                return delete(p, root);
+            else
+            {
+            Console.WriteLine("Point not found");
+                return null;
+            }
         }
+        private KDNode delete(Point x, KDNode p)
+        {
+            if (p == null)
+            { // fell out of tree?
+                Console.WriteLine("point does not exist");
+                return null;
+            }
+            else if (p.point.Equals(x))
+            { // found it
+                if (p.right != null)
+                { // take replacement from right
+                    p.point = findMin(p.right, p.cutDim);
+                    p.right = delete(p.point, p.right);
+                }
+                else if (p.left != null)
+                { // take replacement from left
+                    p.point = findMin(p.left, p.cutDim);
+                    p.right = delete(p.point, p.left); // move left subtree to right!
+                    p.left = null; // left subtree is now empty
+                }
+                else
+                { // deleted point in leaf
+                    p = null; // remove this leaf
+                }
+            }
+            else if (p.inLeftSubtree(x))
+            {
+                p.left = delete(x, p.left); // delete from left subtree
+            }
+            else
+            { // delete from right subtree
+                p.right = delete(x, p.right);
+            }
+            return p;
+        }
+
+
+        private Point findMin(KDNode p, int i)// get min point along dim i
+        { 
+            if (p == null) // fell out of tree?
+            { 
+                return null;
+            }
+            if (p.cutDim == i)// cutting dimension matches i?
+            { 
+                if (p.left == null) // no left child?
+                    return p.point; // use this point
+                else
+                    return findMin(p.left, i); // get min from left subtree
+            }
+            else// it may be in either side
+            { 
+                Point q = minAlongDim(p.point, findMin(p.left, i), i);
+                return minAlongDim(q, findMin(p.right, i), i);
+            }
+        }
+
+        private Point minAlongDim(Point p1, Point p2, int i)
+        { // return smaller point on dim i
+            if (p2 == null || p1.Get(i) <= p2.Get(i)) // p1[i] is short for p1.get(i)
+                return p1;
+            else
+                return p2;
+        }
+
+
+
+
 
         public void Print()     //not mine found on stack ofverflow
         {
@@ -242,12 +314,12 @@ class Program
         Random rnd = new Random();
         KDTree tree = new KDTree();
 
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < 20; j++)
         {
             Point point = new Point(2);
 
             for (int i = 0; i < point.getDim(); i++)
-                point.Set(i,  (MathF.Round(rnd.NextSingle(), 3) + Convert.ToSingle(rnd.Next(150))));
+                point.Set(i,  (MathF.Round(rnd.NextSingle(), 1) + Convert.ToSingle(rnd.Next(150))));
                 if(!tree.Insert(point, ref tree.root, j % point.getDim()))
                     Console.WriteLine("Insertion failed");
         }
@@ -255,16 +327,19 @@ class Program
         tree.Print();
         Console.WriteLine();
 
-        Console.WriteLine("check if tree contains a point");
+        Console.WriteLine("Delete a point");
         do
         {
             Point p = new Point(2);
-            Console.WriteLine("Enter Coordinates one");
+            Console.WriteLine("\n Enter Coordinate one");
             p.Set(0, Convert.ToSingle(Console.ReadLine()));
-            Console.WriteLine("Enter Coordinates two");
+            Console.WriteLine("Enter Coordinate two");
             p.Set(1, Convert.ToSingle(Console.ReadLine()));
-            Console.WriteLine(tree.Contains(p));
-            Console.WriteLine("any key to continue");
+            tree.delete(p);
+            Console.WriteLine();
+            tree.Print();
+            Console.WriteLine();
+            Console.WriteLine("any key to continue, q to quit");
         } while (Console.ReadKey().Key != ConsoleKey.Q);
     }
 }
