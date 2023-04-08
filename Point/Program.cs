@@ -70,9 +70,9 @@ public class Point
 
         for (int i = 0; i < getDim(); i++) // For each dimension, concatenate the dimension value to the return string
         {
-            pointString += coord[i]+ " ";
+            pointString += coord[i]+ ", ";
         }
-        pointString = pointString.Substring(0, pointString.Length - 1) + ")";
+        pointString = pointString.Substring(0, pointString.Length - 2) + ")";
         return pointString;
     }
 
@@ -119,7 +119,7 @@ class KDTree
     public KDTree()
     {
         this.root = null;
-        maxVal = 100.0f;
+        maxVal = 99.0f;
     }
 
     //overloaded constructor 1
@@ -141,9 +141,16 @@ class KDTree
 
 
     // Insert method
-    //Inserts a point p into the KDTree
+    // Inserts a point p into the KDTree
+    // takes a point p, and the cutting dimension cutDim to start at
+    public bool Insert(Point p, int cutDim)
+    {
+              return Insert(p, ref root, cutDim);
+    }
+    // Private Insert method
+    // Inserts a point p into the KDTree
     // takes a point p, a KDNode x to start at, and the cutting dimension cutDim to start at
-    public bool Insert(Point p,ref KDNode x, int cutDim)
+    private bool Insert(Point p,ref KDNode x, int cutDim)
     {
         for (int i = 0; i < p.getDim(); i++)   //Check if p's values are all less than the max value set for the tree
         {
@@ -197,21 +204,26 @@ class KDTree
     }
 
 
-    public KDNode delete(Point p)
+    //public Delete
+    //deletes a point in the tree if found
+    //takes a point p as an argurment
+    public bool delete(Point p)
     {
-        if (this.Contains(p))
-            return delete(p, root);
-        else
-        {
-        Console.WriteLine("Point not found");
-            return null;
-        }
+        bool found = true;
+        delete(p, root, ref found);
+        return found;
     }
-    private KDNode delete(Point x, KDNode p)
+
+    //private Delete
+    //called by public delete, recursively navigates throughkd tree to find the point returns null if not found
+    //deletes the point and finds a suitible replacement in either subtree
+    //takes the point p to delete, and the root node as arguments
+    private KDNode delete(Point x, KDNode p, ref bool found)
+
     {
         if (p == null)
         { // fell out of tree?
-            Console.WriteLine("point does not exist");
+            found = false;
             return null;
         }
         else if (p.point.Equals(x))
@@ -219,12 +231,12 @@ class KDTree
             if (p.right != null)
             { // take replacement from right
                 p.point = findMin(p.right, p.cutDim);
-                p.right = delete(p.point, p.right);
+                p.right = delete(p.point, p.right, ref found);
             }
             else if (p.left != null)
             { // take replacement from left
                 p.point = findMin(p.left, p.cutDim);
-                p.right = delete(p.point, p.left); // move left subtree to right!
+                p.right = delete(p.point, p.left, ref found); // move left subtree to right!
                 p.left = null; // left subtree is now empty
             }
             else
@@ -234,17 +246,20 @@ class KDTree
         }
         else if (p.inLeftSubtree(x))
         {
-            p.left = delete(x, p.left); // delete from left subtree
+            p.left = delete(x, p.left, ref found); // delete from left subtree
         }
         else
         { // delete from right subtree
-            p.right = delete(x, p.right);
+            p.right = delete(x, p.right, ref found);
         }
         return p;
     }
 
-
-    private Point findMin(KDNode p, int i)// get min point along dim i
+    // private findMin()
+    // used by delete to find replacement for deleted node
+    // get min point along dim i
+    // takes node p to be deleted and its cutting dimension i as arguments
+    private Point findMin(KDNode p, int i)
     { 
         if (p == null) // fell out of tree?
         { 
@@ -264,9 +279,11 @@ class KDTree
         }
     }
 
+    // private minAlongDim 
+    // return smallerof two points on dimension i
     private Point minAlongDim(Point p1, Point p2, int i)
-    { // return smaller point on dim i
-        if (p2 == null || p1.Get(i) <= p2.Get(i)) // p1[i] is short for p1.get(i)
+    { 
+        if (p2 == null || p1.Get(i) <= p2.Get(i)) 
             return p1;
         else
             return p2;
@@ -276,48 +293,36 @@ class KDTree
 
 
 
-    public void Print()     //not mine found on stack ofverflow
+    public void Print()     
     {
         int depth = 0;
         int order = 0;
-        Print(root, 1, depth);
 
         List<string> levels = new List<string>();
-        Print2(root, depth, levels, ref order);
+        Print(root, depth, levels, ref order);
         Console.WriteLine();
+        int i = 0;
         foreach (string level in levels)
         {
             Console.WriteLine(level);
-        }
+            i ++;
+
+
+            if (i % 2 == 0)
+            {
+                if (i % 4 == 0)
+                    Console.ForegroundColor = ConsoleColor.Red;
+                else
+                    Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+                Console.ResetColor();
+            }
+        Console.ResetColor();
     }
 
-    public void Print(KDNode p, int padding, int depth)
-    {
-        if (p != null)
-        {
-            if (p.right != null)
-            {
-                Print(p.right, padding + 4, depth+1);
-            }
-            if (padding > 0)
-            {
-                Console.Write(" ".PadLeft(padding));
-            }
-            if (p.right != null)
-            {
-                Console.Write("/\n");
-                Console.Write(" ".PadLeft(padding));
-            }
-            Console.Write(depth + p.ToString() + "\n ");
-            if (p.left != null)
-            {
-                Console.Write(" ".PadLeft(padding) + "\\\n");
-                Print(p.left, padding + 4, depth + 1);
-            }
-        }
-    }
-
-    private void Print2(KDNode p, int depth, List<string> levels, ref int order)
+    
+    private void Print(KDNode p, int depth, List<string> levels, ref int order)
     {
         while (levels.Count < (2* (depth + 2)))
         {
@@ -326,7 +331,7 @@ class KDTree
 
         if ((p.left != null)) 
         {
-            Print2(p.left, depth + 1, levels, ref order);  
+            Print(p.left, depth + 1, levels, ref order);  
         }
 
 
@@ -334,18 +339,19 @@ class KDTree
         string s2 = levels.ElementAt((depth * 2)+1);
 
         levels.RemoveAt(depth*2);
-        s = s + String.Concat(Enumerable.Repeat(" ", (order * (p.ToString()).Length) - s.Length)) + p.ToString();
+        s = s + String.Concat(Enumerable.Repeat(" ", Math.Abs((order * 12) - s.Length))) +" " + p.ToString();
+        s = s + String.Concat(Enumerable.Repeat(" ", Math.Abs(12 - p.ToString().Length)));
 
         levels.Insert(depth * 2, s);
 
 
         levels.RemoveAt(depth * 2 +1);
-        s2 = s2 + String.Concat(Enumerable.Repeat(" ", (order * (p.ToString()).Length) - s2.Length)) ;
+        s2 = s2 + String.Concat(Enumerable.Repeat(" ", (order * 12) - s2.Length ) ) ;
 
         if (p.left != null)
             s2 = s2 + "/";
         if (p.right != null)
-            s2 = s2 + String.Concat(Enumerable.Repeat(" ", (p.ToString()).Length)) + "\\";
+            s2 = s2 + String.Concat(Enumerable.Repeat(" ", 12)) + "\\";
 
         levels.Insert((depth * 2) + 1, s2);
         
@@ -354,7 +360,7 @@ class KDTree
 
         if ((p.right != null))
         {
-            Print2(p.right, depth + 1, levels, ref order);
+            Print(p.right, depth + 1, levels, ref order);
         }
 
         
@@ -368,32 +374,38 @@ class Program
     static void Main(string[] args)
     {
         Random rnd = new Random();
-        KDTree tree = new KDTree();
+        KDTree tree = new KDTree(); //create an empty tree using default constructor (max value for a point is 99 for ease of printing)
 
-        for (int j = 0; j < 20; j++)
+        Point root = new Point(4);
+      
+        for (int j = 0; j < 10; j++)//insert 10 points
         {
-            Point point = new Point(2);
+            Point point = new Point(4);//create an empty point
 
-            for (int i = 0; i < point.getDim(); i++)
-                point.Set(i,  (MathF.Round(rnd.NextSingle(), 1) + Convert.ToSingle(rnd.Next(150))));
-                if(!tree.Insert(point, ref tree.root, j % point.getDim()))
-                    Console.WriteLine("Insertion failed");
+            for (int i = 0; i < point.getDim(); i++) //set value for all of the points dimensions
+                point.Set(i,  (MathF.Round(rnd.NextSingle(), 1) + Convert.ToSingle(rnd.Next(100)))); //set random value for a point
+
+                if(!tree.Insert(point, j % point.getDim())) //insert point 
+                    Console.WriteLine("Insertion failed");  //if point can't be inserted display meassage
         }
+
         Console.WriteLine();
-        tree.Print();
+        tree.Print();//print out tree 
         Console.WriteLine();
 
-        Console.WriteLine("Delete a point");
+        Console.WriteLine("see if tree contains a point");
         do
         {
-            Point p = new Point(2);
-            Console.WriteLine("\n Enter Coordinate one");
+            Point p = new Point(2);  //create empty point
+            Console.WriteLine("\n Enter Coordinate one");  //user set custom value to point
             p.Set(0, Convert.ToSingle(Console.ReadLine()));
             Console.WriteLine("Enter Coordinate two");
             p.Set(1, Convert.ToSingle(Console.ReadLine()));
-            tree.delete(p);
-            Console.WriteLine();
-            tree.Print();
+
+
+            
+            Console.WriteLine(tree.Contains(p));      //test Contains method
+
             Console.WriteLine();
             Console.WriteLine("any key to continue, q to quit");
         } while (Console.ReadKey().Key != ConsoleKey.Q);

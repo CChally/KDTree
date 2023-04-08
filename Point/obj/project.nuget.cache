@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "seNwsWB1bVKamHd4K+7B4KmX/HAoECs3NgVeGwNRsyOzz7vVKfV1GJ14vdeTVOzbU/obpgmmYnXPvBkHYoThNQ==",
+  "dgSpecHash": "iRRcJ+babOSeGczmg/ePiZjktlL6L+8JNh6kdIct8b1tauD9sE9MLNjMcXkkfShU2kZxUCfNogKyCAXwJCcFgA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\bennn\\source\\repos\\KDTree\\Point\\Point.csproj",
+  "projectFilePath": "/Users/Ben/Documents/GitHub/KDTree/Point/Point.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
